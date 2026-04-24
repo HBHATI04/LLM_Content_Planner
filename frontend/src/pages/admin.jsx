@@ -149,13 +149,11 @@ function BarChart({ data }) {
 
 function AgentBar({ label, value, total, color }) {
   const pct = total ? Math.round((value / total) * 100) : 0;
-  const [w, setW] = useState(0);
-  useEffect(() => { const t = setTimeout(() => setW(pct), 500); return () => clearTimeout(t); }, [pct]);
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs font-bold uppercase w-20 shrink-0" style={{ color: "rgba(99,179,237,0.4)", fontFamily: "'Space Mono',monospace", fontSize: "9px", letterSpacing: "0.5px" }}>{label}</span>
       <div className="flex-1 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${w}%`, background: color, boxShadow: `0 0 8px ${color}77` }} />
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color, boxShadow: `0 0 8px ${color}77` }} />
       </div>
       <span className="text-xs font-mono w-9 text-right shrink-0" style={{ color, fontFamily: "'Space Mono',monospace" }}>{pct}%</span>
     </div>
@@ -452,14 +450,10 @@ function PageLogs({ logs }) {
 }
 
 function MiniBar({ value, max, color }) {
-  const [w, setW] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setW(max > 0 ? (value / max) * 100 : 0), 300);
-    return () => clearTimeout(t);
-  }, [value, max]);
+  const pct = max > 0 ? (value / max) * 100 : 0;
   return (
     <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden", marginTop: 6 }}>
-      <div style={{ height: "100%", width: `${w}%`, background: color, borderRadius: 2, transition: "width 0.8s cubic-bezier(.16,1,.3,1)", boxShadow: `0 0 6px ${color}88` }} />
+      <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 2, boxShadow: `0 0 6px ${color}88` }} />
     </div>
   );
 }
@@ -674,11 +668,7 @@ function PageAnalytics({ authFetch }) {
 
   // Horizontal bar
   function HBar({ label, value, max, color, right }) {
-    const [w, setW] = useState(0);
-    useEffect(() => {
-      const t = setTimeout(() => setW(max > 0 ? (value / max) * 100 : 0), 200);
-      return () => clearTimeout(t);
-    }, [value, max]);
+    const pct = max > 0 ? (value / max) * 100 : 0;
     return (
       <div style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
@@ -687,9 +677,8 @@ function PageAnalytics({ authFetch }) {
         </div>
         <div style={{ height: 5, background: "rgba(255,255,255,0.05)", borderRadius: 3, overflow: "hidden" }}>
           <div style={{
-            height: "100%", width: `${w}%`, borderRadius: 3,
+            height: "100%", width: `${pct}%`, borderRadius: 3,
             background: `linear-gradient(90deg, ${color}88, ${color})`,
-            transition: "width 0.9s cubic-bezier(.16,1,.3,1)",
             boxShadow: `0 0 8px ${color}66`,
           }} />
         </div>
