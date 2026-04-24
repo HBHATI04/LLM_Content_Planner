@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from crew.chat_crew import run_chat, stream_chat
-from transcribe import router as transcribe_router
+from api.transcribe import router as transcribe_router
 from crew.multi_agent_crew import get_experts_list
 from config.langsmith import setup_langsmith
 from tools.document_generator import generate_pdf, generate_docx
