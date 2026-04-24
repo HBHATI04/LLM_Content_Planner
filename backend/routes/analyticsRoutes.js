@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Analytics = require("../models/Analytics");
+const Analytics = require("../models/analytics");
 const User = require("../models/user");
 const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
