@@ -145,7 +145,7 @@ router.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Verify your email first" });
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, role: user.role, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
@@ -157,7 +157,8 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        profession: user.profession, // ✅ added
+        isAdmin: user.isAdmin,
+        profession: user.profession,
       },
     });
   } catch (err) {
@@ -183,7 +184,7 @@ router.get(
     }
 
     const token = jwt.sign(
-      { id: req.user._id, role: req.user.role },
+      { id: req.user._id, role: req.user.role, isAdmin: req.user.isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
