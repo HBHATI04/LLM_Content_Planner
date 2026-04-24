@@ -1,0 +1,24 @@
+# ─── Web Framework ───────────────────────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+
+# ─── HTTP Clients ─────────────────────────────────────────────────────────────
+httpx==0.28.1
+requests==2.32.3
+
+# ─── AI / LLM ─────────────────────────────────────────────────────────────────
+openai==1.58.1                  # NVIDIA API (OpenAI-compatible)
+crewai==0.95.0                  # Multi-agent framework
+groq==0.13.1                    # Groq Whisper transcription
+
+# ─── LangSmith (observability & tracing) ─────────────────────────────────────
+langsmith==0.2.3
+langchain-core==0.3.28          # Required by langsmith traceable
+
+# ─── Document Generation ──────────────────────────────────────────────────────
+reportlab==4.2.5                # PDF generation
+python-docx==1.1.2              # DOCX generation
+
+# ─── Environment & Config ─────────────────────────────────────────────────────
+python-dotenv==1.0.1
