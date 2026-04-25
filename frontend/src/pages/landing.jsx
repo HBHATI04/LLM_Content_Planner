@@ -95,11 +95,18 @@ export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [activeExpert, setActiveExpert] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", h);
     return () => window.removeEventListener("scroll", h);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -301,14 +308,11 @@ export default function Landing() {
           .agents-grid { grid-template-columns: 1fr 1fr !important; }
           .features-grid { grid-template-columns: 1fr !important; }
           .footer-inner { flex-direction: column !important; gap: 16px !important; text-align: center !important; }
-          .hide-mobile { display: none !important; }
-          .show-mobile { display: flex !important; }
         }
         @media (max-width: 480px) {
           .stats-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .agents-grid { grid-template-columns: 1fr !important; }
         }
-        .show-mobile { display: none; }
       `}</style>
 
       {/* Noise overlay */}
@@ -352,28 +356,32 @@ export default function Landing() {
         </div>
 
         {/* Desktop nav */}
-        <div className="hide-mobile" style={{ display: "flex", alignItems: "center", gap: 28 }}>
-          {["Features", "Experts", "How it Works"].map(l => (
-            <a key={l} className="nav-link" href={`#${l.toLowerCase().replace(/ /g, "-")}`}>{l}</a>
-          ))}
-        </div>
+        {!isMobile && (
+          <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+            {["Features", "Experts", "How it Works"].map(l => (
+              <a key={l} className="nav-link" href={`#${l.toLowerCase().replace(/ /g, "-")}`}>{l}</a>
+            ))}
+          </div>
+        )}
 
         {/* Desktop CTA */}
-        <div className="hide-mobile">
+        {!isMobile && (
           <button className="btn-primary" onClick={() => navigate("/auth")} style={{ padding: "8px 20px", fontSize: 13 }}>
             Sign In →
           </button>
-        </div>
+        )}
 
-        {/* Hamburger */}
-        <button className="show-mobile" onClick={() => setMenuOpen(v => !v)} style={{
-          background: "none", border: "none", cursor: "pointer",
-          display: "flex", flexDirection: "column", gap: 5, padding: 4,
-        }}>
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{ width: 22, height: 2, background: "#e8edf5", borderRadius: 2, display: "block" }} />
-          ))}
-        </button>
+        {/* Hamburger — mobile only */}
+        {isMobile && (
+          <button onClick={() => setMenuOpen(v => !v)} style={{
+            background: "none", border: "none", cursor: "pointer",
+            display: "flex", flexDirection: "column", gap: 5, padding: 4,
+          }}>
+            {[0, 1, 2].map(i => (
+              <span key={i} style={{ width: 22, height: 2, background: "#e8edf5", borderRadius: 2, display: "block" }} />
+            ))}
+          </button>
+        )}
       </nav>
 
       {/* ── Hero ── */}
