@@ -209,18 +209,17 @@ def run_chat(prompt: str, history: list, expert: str = "strategist") -> dict:
 
         # ── Image request? ────────────────────────────────────────────────────
         if _is_image_request(prompt):
-            task = Task(
-                description=f"""
-                Write a detailed Stable Diffusion image generation prompt based on: "{prompt}"
-                Rules: Output ONLY the image prompt. No preamble, no labels.
-                Describe: subject, style, colors, mood, lighting, composition.
-                """,
-                expected_output="A single detailed image prompt string, nothing else.",
-                agent=writer_agent,
+            messages = [
+                {"role": "system", "content": "You are an expert at writing Stable Diffusion image generation prompts. Output ONLY the image prompt — no preamble, no labels, no explanation."},
+                {"role": "user", "content": f"Write a detailed Stable Diffusion prompt for: {prompt}\nDescribe subject, style, colors, mood, lighting, composition."},
+            ]
+            image_prompt, _, _ = _traced_llm_call(
+                messages=messages,
+                max_tokens=200,
+                temperature=0.7,
+                expert=expert,
+                call_type="image-prompt",
             )
-            crew = Crew(agents=[writer_agent], tasks=[task], verbose=False)
-            result = crew.kickoff()
-            image_prompt = str(result.raw if hasattr(result, "raw") else result).strip()
             for prefix in ["here is", "image prompt:", "prompt:", "output:"]:
                 if image_prompt.lower().startswith(prefix):
                     image_prompt = image_prompt[len(prefix):].strip(" :\n")
@@ -230,7 +229,7 @@ def run_chat(prompt: str, history: list, expert: str = "strategist") -> dict:
             if file_path and file_path.endswith(".png"):
                 return {"text": "Here is your generated image:", "imageUrl": f"/{file_path.lstrip('/')}"}
             return {"text": "Image generation failed. Check your STABILITY_API_KEY in .env."}
-
+            
         # ── Text response ─────────────────────────────────────────────────────
         messages = _build_messages(prompt, formatted_history, _is_greeting(prompt))
         text, _, _ = _traced_llm_call(
@@ -291,17 +290,17 @@ def stream_chat(prompt: str, history: list, expert: str = "strategist", **kwargs
         # ── Image request? ────────────────────────────────────────────────────
         if _is_image_request(prompt):
             yield {"type": "token", "value": "Generating your image, please wait..."}
-            task = Task(
-                description=f"""
-                Write a detailed Stable Diffusion image generation prompt based on: "{prompt}"
-                Rules: Output ONLY the image prompt. No preamble, no labels.
-                """,
-                expected_output="A single detailed image prompt string, nothing else.",
-                agent=writer_agent,
+            messages = [
+                {"role": "system", "content": "You are an expert at writing Stable Diffusion image generation prompts. Output ONLY the image prompt — no preamble, no labels, no explanation."},
+                {"role": "user", "content": f"Write a detailed Stable Diffusion prompt for: {prompt}\nDescribe subject, style, colors, mood, lighting, composition."},
+            ]
+            image_prompt, _, _ = _traced_llm_call(
+                messages=messages,
+                max_tokens=200,
+                temperature=0.7,
+                expert=expert,
+                call_type="image-prompt-stream",
             )
-            crew = Crew(agents=[writer_agent], tasks=[task], verbose=False)
-            result = crew.kickoff()
-            image_prompt = str(result.raw if hasattr(result, "raw") else result).strip()
             for prefix in ["here is", "image prompt:", "prompt:", "output:"]:
                 if image_prompt.lower().startswith(prefix):
                     image_prompt = image_prompt[len(prefix):].strip(" :\n")
@@ -314,7 +313,6 @@ def stream_chat(prompt: str, history: list, expert: str = "strategist", **kwargs
                 yield {"type": "token", "value": "\n\nImage generation failed. Check STABILITY_API_KEY."}
             yield {"type": "done", "value": ""}
             return
-
         # ── Greeting — fast direct streaming ────────────────────────────────────
         if _is_greeting(prompt):
             client = _get_openai_client()
