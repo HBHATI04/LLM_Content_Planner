@@ -8,10 +8,9 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env", override=True)
 
 # 70B for deep strategic reasoning
 _llm = LLM(
-    model="meta/llama-3.1-70b-instruct",
+    model="nvidia_nim/meta/llama-3.1-70b-instruct",
     api_key=os.getenv("NVIDIA_API_KEY_STRATEGIST") or os.getenv("NVIDIA_API_KEY"),
     base_url="https://integrate.api.nvidia.com/v1",
-    provider="openai",
     temperature=0.6,
     max_tokens=600,
 )
