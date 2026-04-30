@@ -8,10 +8,9 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env", override=True)
 
 # Llama 3.3 70B — best for analytical, metrics-focused structured output
 _llm = LLM(
-    model="meta/llama-3.3-70b-instruct",
+    model="nvidia_nim/meta/llama-3.3-70b-instruct",
     api_key=os.getenv("NVIDIA_API_KEY_ANALYST") or os.getenv("NVIDIA_API_KEY"),
     base_url="https://integrate.api.nvidia.com/v1",
-    provider="openai",
     temperature=0.3,
     max_tokens=600,
 )
