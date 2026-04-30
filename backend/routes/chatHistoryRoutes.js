@@ -27,8 +27,32 @@ async function proxyDocDownload(req, res) {
   }
 }
 
-async function checkAIEngine() {
+// Proxy: serve a generated image from AI-Engine
+async function proxyImageServe(req, res) {
+  const filePath = req.query.path;
+  if (!filePath || !filePath.startsWith("/generated_images/")) {
+    return res.status(400).json({ message: "Invalid image path." });
+  }
+  try {
+    const fileRes = await axios.get(`${AI_ENGINE_URL}${filePath}`, {
+      responseType: "stream",
+      timeout: 30_000,
+    });
+    res.setHeader("Content-Type", fileRes.headers["content-type"] || "image/png");
+    fileRes.data.pipe(res);
+  } catch (err) {
+    console.error("[Image Serve Error]", err.message);
+    res.status(500).json({ message: "Failed to load image." });
+  }
+}
 
+// ─── Doc Download Proxy ──────────────────────────────────────────────────────
+router.get("/doc-download", authMiddleware, proxyDocDownload);
+
+// ─── Image Serve Proxy ────────────────────────────────────────────────────────
+router.get("/image", authMiddleware, proxyImageServe);
+
+async function checkAIEngine() {
   try {
     await axios.get(`${AI_ENGINE_URL}/health`, { timeout: 3000 });
     return true;
@@ -36,9 +60,6 @@ async function checkAIEngine() {
     return false;
   }
 }
-
-// ─── Doc Download Proxy ──────────────────────────────────────────────────────
-router.get("/doc-download", authMiddleware, proxyDocDownload);
 
 // ─── Voice Transcription Proxy ────────────────────────────────────────────────
 router.post(
