@@ -121,7 +121,9 @@ function Toast({ message, type, onDismiss }) {
 function ImageCard({ imageUrl }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const url = `${API_BASE}${imageUrl}`;
+  const token = localStorage.getItem("token");
+  // Route through backend proxy so the image is fetched from the AI engine server-side
+  const url = `${API_BASE}/api/chats/image?path=${encodeURIComponent(imageUrl)}`;
   return (
     <div className="mt-3 rounded-2xl overflow-hidden border border-white/8 w-fit max-w-xs shadow-xl">
       {!loaded && !error && (
