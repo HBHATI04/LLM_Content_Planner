@@ -19,9 +19,11 @@ setup_langsmith()
 
 app = FastAPI(title="AI-Engine", version="1.0.0")
 
-# Serve generated docs statically so Express can proxy them
+# Serve generated docs and images statically so Express can proxy them
 os.makedirs("generated_docs", exist_ok=True)
+os.makedirs("generated_images", exist_ok=True)
 app.mount("/generated_docs", StaticFiles(directory="generated_docs"), name="generated_docs")
+app.mount("/generated_images", StaticFiles(directory="generated_images"), name="generated_images")
 
 app.add_middleware(
     CORSMiddleware,
