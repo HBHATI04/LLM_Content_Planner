@@ -119,30 +119,53 @@ function Toast({ message, type, onDismiss }) {
 }
 
 function ImageCard({ imageUrl }) {
-  const [loaded, setLoaded] = useState(false);
+  const [blobUrl, setBlobUrl] = useState(null);
   const [error, setError] = useState(false);
-  const token = localStorage.getItem("token");
-  // Route through backend proxy so the image is fetched from the AI engine server-side
-  const url = `${API_BASE}/api/chats/image?path=${encodeURIComponent(imageUrl)}`;
+
+  useEffect(() => {
+    if (!imageUrl) return;
+    let objectUrl = null;
+    const token = localStorage.getItem("token");
+    const proxyUrl = `${API_BASE}/api/chats/image?path=${encodeURIComponent(imageUrl)}`;
+
+    fetch(proxyUrl, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setBlobUrl(objectUrl);
+      })
+      .catch((err) => {
+        console.error("[ImageCard] fetch error:", err);
+        setError(true);
+      });
+
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [imageUrl]);
+
   return (
     <div className="mt-3 rounded-2xl overflow-hidden border border-white/8 w-fit max-w-xs shadow-xl">
-      {!loaded && !error && (
+      {!blobUrl && !error && (
         <div className="w-64 h-40 flex items-center justify-center bg-zinc-800 gap-2 text-zinc-500 text-xs">
           <span className="w-3.5 h-3.5 border border-zinc-600 border-t-zinc-300 rounded-full animate-spin" /> Loading…
         </div>
       )}
-      {error && <div className="w-64 h-28 flex items-center justify-center bg-zinc-800 text-zinc-500 text-xs">Failed to load</div>}
-      <img src={url} alt="AI generated" className={`max-w-full transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0 h-0"}`}
-        onLoad={() => setLoaded(true)} onError={() => setError(true)} />
-      {loaded && (
-        <div className="flex items-center justify-between px-3 py-2 border-t border-white/6 bg-zinc-900/60">
-          <span className="text-xs text-zinc-500">Generated image</span>
-          <a href={url} download className="text-xs text-blue-400 hover:text-blue-300">↓ Download</a>
-        </div>
+      {error && <div className="w-64 h-28 flex items-center justify-center bg-zinc-800 text-zinc-500 text-xs">Failed to load image</div>}
+      {blobUrl && (
+        <>
+          <img src={blobUrl} alt="AI generated" className="max-w-full" />
+          <div className="flex items-center justify-between px-3 py-2 border-t border-white/6 bg-zinc-900/60">
+            <span className="text-xs text-zinc-500">Generated image</span>
+            <a href={blobUrl} download="generated_image.png" className="text-xs text-blue-400 hover:text-blue-300">↓ Download</a>
+          </div>
+        </>
       )}
     </div>
   );
 }
+
 
 function FileCard({ fileUrl, fileName }) {
   const isPdf = fileName?.endsWith(".pdf");
