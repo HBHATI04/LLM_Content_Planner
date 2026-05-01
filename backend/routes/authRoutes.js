@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { sendEmail } = require("../utils/gmailMailer");
 const axios = require("axios");
 const passport = require("passport");
 
@@ -81,21 +81,10 @@ router.post("/signup", async (req, res) => {
       isVerified: false,
     });
 
-    // ✅ Send email
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
+    // ✅ Send email via Gmail API (HTTPS / port 443 — works on Render)
     const verificationLink = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
 
-    await transporter.sendMail({
-      from: `"LLM Content Planner" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: "Verify Your Email",
       html: verificationEmail(name, verificationLink),
