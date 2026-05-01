@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const axios = require("axios");
 const passport = require("passport");
 
@@ -81,21 +81,13 @@ router.post("/signup", async (req, res) => {
       isVerified: false,
     });
 
-    // ✅ Send email
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // ✅ Send email via Resend (works on Render — uses HTTPS not SMTP)
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const verificationLink = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
 
-    await transporter.sendMail({
-      from: `"LLM Content Planner" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: "LLM Content Planner <onboarding@resend.dev>",
       to: email,
       subject: "Verify Your Email",
       html: verificationEmail(name, verificationLink),
